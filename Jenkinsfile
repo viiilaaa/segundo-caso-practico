@@ -8,10 +8,9 @@ pipeline {
             steps {
                 echo 'Obtenemos el código fuente'
                 checkout scm
-                sh '''
-                    echo "BRANCH_NAME=$BRANCH_NAME"
-                '''
+                echo "BRANCH_NAME=${env.BRANCH_NAME}"
                 stash name:'codigo', includes:'**'
+                sh 'ls -la'
             }
         }
         stage('Static test') {
@@ -19,10 +18,10 @@ pipeline {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                     unstash name:'codigo'
                     sh '''
-                        python -m flake8 --exit-zero --format=pylint todo_list-aws/src>flake8.out
+                        python3 -m flake8 --exit-zero --format=pylint todo_list-aws/src>flake8.out
                         '''
                     sh '''
-                        python -m bandit --exit-zero -r todo_list-aws -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {severity}: {msg}"
+                        python3 -m bandit --exit-zero -r todo_list-aws -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {severity}: {msg}"
                         '''
                     recordIssues qualityGates: [[threshold: 8, type: 'TOTAL', unstable: true], [threshold: 10, type: 'TOTAL', unstable: false]], tools: [flake8(name: 'Flake8',pattern: 'flake8.out'),pyLint(name: 'Bandit',pattern: 'bandit.out')]
                 }
