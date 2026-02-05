@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+
+    options { skipDefaultCheckout() }
+
+    stages {
+        stage('Get code') {
+            steps {
+                echo 'Obtenemos el código fuente'
+                checkout scm
+                sh '''
+                    echo "BRANCH_NAME=$BRANCH_NAME"
+                '''
+                stash name:'codigo', includes:'**'
+            }
+        }
+        stage('Static test') {
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    unstash name:'codigo'
+                    sh '''
+                        python -m flake8 --exit-zero --format=pylint todo_list-aws/src>flake8.out
+                        '''
+                    sh '''
+                        python -m bandit --exit-zero -r todo_list-aws -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {severity}: {msg}"
+                        '''
+                    recordIssues qualityGates: [[threshold: 8, type: 'TOTAL', unstable: true], [threshold: 10, type: 'TOTAL', unstable: false]], tools: [flake8(name: 'Flake8',pattern: 'flake8.out'),pyLint(name: 'Bandit',pattern: 'bandit.out')]
+                }
+            }
+            post { always { cleanWs() } }   
+        }
+    }
+}
