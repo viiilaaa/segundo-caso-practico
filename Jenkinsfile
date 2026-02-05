@@ -29,9 +29,12 @@ pipeline {
         }
         stage('Deploy') {
             steps {
+                unstash name:'codigo'
+
                 echo 'Desplegamos la aplicación'
-                sh 'sam build'
-                sh 'sam validate'
+                sh 'sam build --template todo_list-aws/template.yaml'
+                sh 'sam validate --template todo_list-aws/template.yaml'
+                
                 sh 'ls -la'
             }
             post { always { cleanWs() } }   
