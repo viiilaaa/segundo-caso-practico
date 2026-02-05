@@ -45,7 +45,7 @@ pipeline {
                 sh """
                     sam deploy \
                     --template-file .aws-sam/build/template.yaml \
-                    --config-file ./todo_list-aws/samconfig.toml \
+                    --config-file ${WORKSPACE}/todo_list-aws/samconfig.toml \
                     --config-env staging \
                     --resolve-s3 \
                     --no-confirm-changeset \
