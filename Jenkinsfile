@@ -40,6 +40,15 @@ pipeline {
                 sh 'sam validate --template todo_list-aws/template.yaml'
                 
                 sh 'ls -la'
+
+                sh """
+                    sam deploy \
+                    --template-file .aws-sam/build/template.yaml \
+                    --config-file todo_list-aws/samconfig.toml \
+                    --resolve-s3 \
+                    --no-confirm-changeset \
+                    --no-fail-on-empty-changeset
+                """
             }
             post { always { cleanWs() } }   
         }
