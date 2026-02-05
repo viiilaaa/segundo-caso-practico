@@ -40,6 +40,7 @@ pipeline {
                 sh 'sam validate --template todo_list-aws/template.yaml'
                 
                 sh 'ls -la'
+                sh 'ls -la /todo_list-aws'
 
                 sh """
                     sam deploy \
