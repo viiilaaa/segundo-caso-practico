@@ -3,6 +3,10 @@ pipeline {
 
     options { skipDefaultCheckout() }
 
+    environment {
+                AWS_DEFAULT_REGION = 'us-east-1'
+            }
+
     stages {
         stage('Get code') {
             steps {
