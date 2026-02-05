@@ -8,7 +8,6 @@ pipeline {
             steps {
                 echo 'Obtenemos el código fuente'
                 checkout scm
-                echo "La referencia completa de git es: ${env.GIT_BRANCH}"
                 stash name:'codigo', includes:'**'
                 sh 'ls -la'
             }
@@ -25,6 +24,15 @@ pipeline {
                         '''
                     recordIssues qualityGates: [[threshold: 8, type: 'TOTAL', unstable: true], [threshold: 10, type: 'TOTAL', unstable: false]], tools: [flake8(name: 'Flake8',pattern: 'flake8.out'),pyLint(name: 'Bandit',pattern: 'bandit.out')]
                 }
+            }
+            post { always { cleanWs() } }   
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Desplegamos la aplicación'
+                sh 'sam build'
+                sh 'sam validate'
+                sh 'ls -la'
             }
             post { always { cleanWs() } }   
         }
